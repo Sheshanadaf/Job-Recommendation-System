@@ -1,0 +1,55 @@
+node_modules/
+.env
+npm-debug.log*
+package-lock.json
+
+# === Logs ===
+logs/
+*.log
+
+# === OS files ===
+.DS_Store
+Thumbs.db
+
+# === Editor settings ===
+.vscode/
+.idea/
+
+# === Build output ===
+dist/
+build/
+
+# === Code coverage ===
+coverage/
+
+# === Uploaded files or temporary data ===
+uploads/
+*.tmp
+
+# === MongoDB dump files ===
+dump/
+
+# === Python virtual environment ===
+venv/
+.env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# === Jupyter notebooks checkpoints (if used) ===
+.ipynb_checkpoints/
+
+# === Python model/data files ===
+*.npy
+*.joblib
+*.pkl
+
+# === Your project-specific exports ===
+/exports/*.csv
+/exports/*.npy
+
+# === Temporary or debug scripts ===
+*.bak
+*.old
+*.swp
