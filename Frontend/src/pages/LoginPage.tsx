@@ -16,8 +16,10 @@ const LoginPage: React.FC = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include"
       });
       const data = await res.json();
+      console.log(data);
 
       if (res.ok) {
         localStorage.setItem("token", data.token);

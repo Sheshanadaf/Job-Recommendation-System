@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // CORS - allow frontend (React on 3000) to send credentials
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com',
   credentials: true
 }));
 
