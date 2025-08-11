@@ -14,17 +14,16 @@ const corsOptions = {
   origin: 'http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'], // add any custom headers you use
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
 };
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Use this middleware early before routes
+// Use CORS middleware with options
 app.use(cors(corsOptions));
 
-// Also handle OPTIONS requests (preflight)
-app.options('*', cors(corsOptions));
 
 app.use(session({
   secret: 'some secret',
