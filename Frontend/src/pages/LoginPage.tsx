@@ -1,5 +1,6 @@
 import React, { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -11,7 +12,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3001/login", {
+      const res = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

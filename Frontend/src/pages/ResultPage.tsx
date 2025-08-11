@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaSpinner, FaStar } from "react-icons/fa";
+import { API_BASE_URL } from "../config";
 
 const ResultPage = () => {
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ const ResultPage = () => {
       }
 
       const res = await axios.get(
-        `http://localhost:3001/api/read-predict-details/${userId}`
+        `${API_BASE_URL}/api/read-predict-details/${userId}`
       );
 
       setResultOutput(res.data.output);

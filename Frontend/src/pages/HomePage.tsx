@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaBriefcase } from "react-icons/fa";
+import { API_BASE_URL } from "../config";
 
 const HomePage = () => {
   // get job past detailss
@@ -8,7 +9,7 @@ const HomePage = () => {
 
   const fetchStudentData = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/get-jobpost`);
+      const res = await axios.get(`${API_BASE_URL}/api/get-jobpost`);
       console.log("Job Details", res.data);
       setjobdetailstData(res.data.jobPostsFormatted);
     } catch (error) {

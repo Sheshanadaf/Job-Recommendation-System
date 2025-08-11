@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 import React, { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -14,7 +15,7 @@ const Signup: React.FC = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3001/signup", {
+      const res = await fetch(`${API_BASE_URL}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ firstName, lastName, phone, email, password }),

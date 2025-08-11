@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, FileText, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { API_BASE_URL } from "../config";
 
 const QualificationsPage: React.FC = () => {
   const id = localStorage.getItem("userSub");
@@ -23,19 +24,6 @@ const QualificationsPage: React.FC = () => {
     }
   };
 
-  // const handleCVSubmit = () => {
-  //   if (!selectedFile) {
-  //     toast({
-  //       title: "No file selected",
-  //       description: "Please upload a CV before submitting.",
-  //       variant: "destructive"
-  //     });
-  //     return;
-  //   }
-  //   // Navigate to loading/blank page as requested
-  //   navigate('/job-matching');
-  // };
-
   const handleCVSubmit = async () => {
     if (!selectedFile) {
       toast({
@@ -52,7 +40,7 @@ const QualificationsPage: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3001/api/add-userprofile/${id}`,
+        `${API_BASE_URL}/api/add-userprofile/${id}`,
         {
           method: "POST",
           body: formData,
@@ -69,7 +57,7 @@ const QualificationsPage: React.FC = () => {
       });
 
       // ✅ Background API call (non-blocking)
-      fetch(`http://localhost:3001/api/read-user-profile/${id}`, {
+      fetch(`${API_BASE_URL}/api/read-user-profile/${id}`, {
         method: "GET",
       })
         .then((res) => res.json())

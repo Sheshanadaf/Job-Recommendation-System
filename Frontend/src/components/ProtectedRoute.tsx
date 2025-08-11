@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
 
       try {
-        const res = await axios.get("http://localhost:3001/api/user", {
+        const res = await axios.get(`${API_BASE_URL}/api/user`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
