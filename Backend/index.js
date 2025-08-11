@@ -10,17 +10,21 @@ const mongoose = require("mongoose");
 
 const app = express();
 
+const corsOptions = {
+  origin: 'http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'], // add any custom headers you use
+};
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS - allow frontend (React on 3000) to send credentials
-app.use(cors({
-  origin: 'http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com',
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+// Use this middleware early before routes
+app.use(cors(corsOptions));
+
+// Also handle OPTIONS requests (preflight)
+app.options('*', cors(corsOptions));
 
 app.use(session({
   secret: 'some secret',
