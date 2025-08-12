@@ -10,27 +10,15 @@ const mongoose = require("mongoose");
 
 const app = express();
 
-// const corsOptions = {
-//   origin: "http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com",
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-// };
+const corsOptions = {
+  origin: "http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com",
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+};
 
-// // ✅ CORS middleware first
-// app.use(cors(corsOptions));
-
-// ✅ Handle all OPTIONS requests manually
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
+// ✅ CORS middleware first
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
