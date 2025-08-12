@@ -299,74 +299,74 @@ const manageUserProfileDetails = {
       fs.appendFileSync(outputPath, csvLine, "utf8");
 
       // === Run SBERT Python Script ===
-      const { spawn } = require("child_process");
-      const sbertScriptPath = path.join(
-        __dirname,
-        "../python/generate_embeddings.py"
-      );
+      // const { spawn } = require("child_process");
+      // const sbertScriptPath = path.join(
+      //   __dirname,
+      //   "../python/generate_embeddings.py"
+      // );
 
-      // Use "python" not "python3" on Windows unless python3 is configured
-      const sbertProcess = spawn("python", [sbertScriptPath]);
-      console.log(
-        "Running generate_embeddings.py for user ID:",
-        profile._id.toString()
-      );
+      // // Use "python" not "python3" on Windows unless python3 is configured
+      // const sbertProcess = spawn("python", [sbertScriptPath]);
+      // console.log(
+      //   "Running generate_embeddings.py for user ID:",
+      //   profile._id.toString()
+      // );
 
-      let sbertOutput = "";
-      let sbertError = "";
+      // let sbertOutput = "";
+      // let sbertError = "";
 
-      sbertProcess.stdout.on(
-        "data",
-        (data) => (sbertOutput += data.toString())
-      );
-      sbertProcess.stderr.on("data", (data) => (sbertError += data.toString()));
+      // sbertProcess.stdout.on(
+      //   "data",
+      //   (data) => (sbertOutput += data.toString())
+      // );
+      // sbertProcess.stderr.on("data", (data) => (sbertError += data.toString()));
       
-      sbertProcess.on("close", (code) => {
-        if (code !== 0) {
-          return res.status(500).json({
-            message: "SBERT embedding generation failed.",
-            error: sbertError,
-          });
-        }
-        // === Step 2: After SBERT, run xgboost_pipeline.py ===
-        const xgbScriptPath = path.join(
-          __dirname,
-          "../python/xgboost_pipeline.py"
-        );
+      // sbertProcess.on("close", (code) => {
+      //   if (code !== 0) {
+      //     return res.status(500).json({
+      //       message: "SBERT embedding generation failed.",
+      //       error: sbertError,
+      //     });
+      //   }
+      //   // === Step 2: After SBERT, run xgboost_pipeline.py ===
+      //   const xgbScriptPath = path.join(
+      //     __dirname,
+      //     "../python/xgboost_pipeline.py"
+      //   );
 
-        // ✅ FIXED: Now we pass user ID
-        const xgbProcess = spawn("python", [
-          xgbScriptPath,
-          profile._id.toString(),
-        ]);
-        console.log(
-          "Running xgboost_pipeline.py for user ID:",
-          profile._id.toString()
-        );
+      //   // ✅ FIXED: Now we pass user ID
+      //   const xgbProcess = spawn("python", [
+      //     xgbScriptPath,
+      //     profile._id.toString(),
+      //   ]);
+      //   console.log(
+      //     "Running xgboost_pipeline.py for user ID:",
+      //     profile._id.toString()
+      //   );
 
-        let xgbOutput = "";
-        let xgbError = "";
+      //   let xgbOutput = "";
+      //   let xgbError = "";
 
-        xgbProcess.stdout.on("data", (data) => (xgbOutput += data.toString()));
-        xgbProcess.stderr.on("data", (data) => (xgbError += data.toString()));
+      //   xgbProcess.stdout.on("data", (data) => (xgbOutput += data.toString()));
+      //   xgbProcess.stderr.on("data", (data) => (xgbError += data.toString()));
 
-        xgbProcess.on("close", (xgbCode) => {
-          if (xgbCode !== 0) {
-            return res.status(500).json({
-              message: "XGBoost pipeline failed.",
-              error: xgbError,
-            });
-          }
+      //   xgbProcess.on("close", (xgbCode) => {
+      //     if (xgbCode !== 0) {
+      //       return res.status(500).json({
+      //         message: "XGBoost pipeline failed.",
+      //         error: xgbError,
+      //       });
+      //     }
 
-          return res.status(200).json({
-          message: "User profile processed successfully.",
-          userId: profile._id,
-          user_profiles_cleaned,
-          sbertOutput,
-          xgbOutput,
-        });
-        });
-      });
+      //     return res.status(200).json({
+      //     message: "User profile processed successfully.",
+      //     userId: profile._id,
+      //     user_profiles_cleaned,
+      //     sbertOutput,
+      //     xgbOutput,
+      //   });
+      //   });
+      // });
     
     } catch (error) {
     console.error("Error fetching user profile:", error);
