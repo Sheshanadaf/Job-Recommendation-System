@@ -249,7 +249,7 @@ const QualificationsFormPage: React.FC = () => {
       });
 
       // ✅ Background API call (non-blocking)
-      fetch(`http://localhost:3001/api/read-user-profile/${id}`, {
+      fetch(`${API_BASE_URL}/api/read-user-profile/${id}`, {
         method: "GET",
       })
         .then((res) => res.json())
