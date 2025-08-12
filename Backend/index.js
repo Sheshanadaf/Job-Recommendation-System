@@ -17,12 +17,13 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
 };
 
+// Use CORS middleware with options
+app.use(cors(corsOptions));
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Use CORS middleware with options
-app.use(cors(corsOptions));
+
 
 
 app.use(session({

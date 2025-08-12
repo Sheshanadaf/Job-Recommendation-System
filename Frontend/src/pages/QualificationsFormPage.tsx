@@ -254,16 +254,10 @@ const QualificationsFormPage: React.FC = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("Background prediction result:", data);
-          // Optionally: store it
-          // localStorage.setItem("predictionResult", JSON.stringify(data));
-          // Or: toast({
-          //   title: "Prediction Ready",
-          //   description: data.predictedCategory || "Check your dashboard",
-          // });
+          console.log("Background result:", data);
         })
         .catch((err) => {
-          console.error("Background prediction error:", err);
+          console.error("Background error:", err);
         });
 
 // ✅ Navigate immediately after first API call
