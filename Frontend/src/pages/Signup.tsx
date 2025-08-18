@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../config";
 import React, { useState, FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa";
 
 const Signup: React.FC = () => {
   const [firstName, setFirstName] = useState<string>("");
@@ -33,40 +34,50 @@ const Signup: React.FC = () => {
     }
   };
 
+  const inputStyle = {
+    padding: "0.75rem 1rem",
+    borderRadius: 6,
+    border: "1px solid #d1d5db",
+    fontSize: "1rem",
+    outline: "none",
+    transition: "border-color 0.2s ease",
+  };
+
   return (
     <div style={{
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       minHeight: "100vh",
-      background: "#f3f4f6",
+      background: "linear-gradient(135deg, #bae6fd, #e0f2fe)",
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
       padding: "1rem"
     }}>
       <div style={{
         background: "white",
-        padding: "2rem 3rem",
-        borderRadius: 8,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        padding: "2.5rem 3rem",
+        borderRadius: 12,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
         width: "100%",
-        maxWidth: 400
+        maxWidth: 420,
+        textAlign: "center",
+        position: "relative"
       }}>
-        <h2 style={{ textAlign: "center", marginBottom: "1.5rem", color: "#111827" }}>Sign Up</h2>
+        <FaUserCircle style={{ fontSize: 60, color: "#2563eb", marginBottom: 16 }} />
+        <h2 style={{ fontSize: "1.8rem", fontWeight: "bold", marginBottom: "1.5rem", color: "#111827" }}>
+          Create Your Account
+        </h2>
 
-        <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
           <input
             type="text"
             placeholder="First Name"
             value={firstName}
             required
             onChange={(e) => setFirstName(e.target.value)}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              fontSize: "1rem",
-              outline: "none"
-            }}
+            style={inputStyle}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#2563eb")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
           />
           <input
             type="text"
@@ -74,13 +85,9 @@ const Signup: React.FC = () => {
             value={lastName}
             required
             onChange={(e) => setLastName(e.target.value)}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              fontSize: "1rem",
-              outline: "none"
-            }}
+            style={inputStyle}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#2563eb")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
           />
           <input
             type="tel"
@@ -88,13 +95,9 @@ const Signup: React.FC = () => {
             value={phone}
             required
             onChange={(e) => setPhone(e.target.value)}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              fontSize: "1rem",
-              outline: "none"
-            }}
+            style={inputStyle}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#2563eb")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
           />
           <input
             type="email"
@@ -102,13 +105,9 @@ const Signup: React.FC = () => {
             value={email}
             required
             onChange={(e) => setEmail(e.target.value)}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              fontSize: "1rem",
-              outline: "none"
-            }}
+            style={inputStyle}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#2563eb")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
           />
           <input
             type="password"
@@ -116,37 +115,44 @@ const Signup: React.FC = () => {
             value={password}
             required
             onChange={(e) => setPassword(e.target.value)}
-            style={{
-              padding: "0.75rem 1rem",
-              borderRadius: 4,
-              border: "1px solid #d1d5db",
-              fontSize: "1rem",
-              outline: "none"
-            }}
+            style={inputStyle}
+            onFocus={(e) => (e.currentTarget.style.borderColor = "#2563eb")}
+            onBlur={(e) => (e.currentTarget.style.borderColor = "#d1d5db")}
           />
 
           <button
             type="submit"
             style={{
               padding: "0.75rem 1rem",
-              backgroundColor: "#2563eb",
+              background: "linear-gradient(90deg, #2563eb, #1e40af)",
               color: "white",
               fontWeight: "bold",
               fontSize: "1rem",
-              borderRadius: 4,
+              borderRadius: 6,
               border: "none",
               cursor: "pointer",
-              transition: "background-color 0.2s ease"
+              transition: "transform 0.2s ease, box-shadow 0.2s ease"
             }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#1e40af")}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#2563eb")}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
           >
             Sign Up
           </button>
         </form>
 
         {message && (
-          <p style={{ marginTop: "1rem", color: message.toLowerCase().includes("success") ? "green" : "red", textAlign: "center" }}>
+          <p style={{
+            marginTop: "1rem",
+            color: message.toLowerCase().includes("success") ? "green" : "red",
+            textAlign: "center",
+            fontWeight: 500
+          }}>
             {message}
           </p>
         )}

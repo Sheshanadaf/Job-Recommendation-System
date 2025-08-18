@@ -5,11 +5,10 @@ const sw = require("stopword"); //
 const path = require("path");
 const { exec } = require("child_process");
 const router = require("../routes");
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
 
 const AWS = require("aws-sdk");
 
-// top of file (add)
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -26,7 +25,17 @@ function escapeCsvField(str) {
   return String(str).replace(/"/g, '""');
 }
 
+// Helper function to get S3 object as a buffer
+async function getS3FileBuffer(bucket, key) {
+  const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+  const response = await s3.send(command);
 
+  const chunks = [];
+  for await (const chunk of response.Body) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 
 const manageUserProfileDetails = {
@@ -60,7 +69,7 @@ const manageUserProfileDetails = {
         id: id,
         fileName: file ? file.originalname : null,
         fileType: file ? file.mimetype : null,
-        filePath: file ? file.path : null,
+        filePath: file ? file.location : null,
 
         fullName: fullName || null,
         dateOfBirth: dateOfBirth || null,
@@ -121,15 +130,20 @@ const manageUserProfileDetails = {
       let extractedText = null;
       let profileDetailsText = null;
 
-      // If CV file path exists, read and parse the PDF
+      // If CV file path exists, read and parse the PD
+
       if (profile.filePath) {
         try {
-          const pdfBuffer = fs.readFileSync(profile.filePath);
+          const s3Url = new URL(profile.filePath);
+          const bucket = s3Url.hostname.split(".")[0]; // bucket name
+          const key = decodeURIComponent(s3Url.pathname.substring(1)); // remove leading '/'
+
+          const pdfBuffer = await getS3FileBuffer(bucket, key);
           const data = await pdfParse(pdfBuffer);
           extractedText = data.text;
-          console.log("jkjbj",data.text);
+          console.log("Extracted PDF text:", extractedText);
         } catch (pdfErr) {
-          console.warn("Failed to parse PDF:", pdfErr);
+          console.warn("Failed to parse PDF from S3:", pdfErr);
         }
       }
 
@@ -338,13 +352,14 @@ const manageUserProfileDetails = {
       const csvContent = `${csvHeader}${id},"${safeText}"\n`;
 
       try {
-        await s3.send(new PutObjectCommand({
+        await s3.send(
+          new PutObjectCommand({
           Bucket: bucket,
           Key: key,
           Body: csvContent,
           ContentType: "text/csv",
-          // optional: ServerSideEncryption: "AES256"
-        }));
+        })
+      );
         console.log(`Uploaded user CSV to s3://${bucket}/userdetails/${key}`);
       } catch (s3Err) {
         console.error("Failed to upload user CSV to S3:", s3Err);
