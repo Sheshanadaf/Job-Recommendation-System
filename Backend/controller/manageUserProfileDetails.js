@@ -77,12 +77,12 @@ const manageUserProfileDetails = {
       };
 
       // Check if ID already exists in DB
-    const existingUser = await userprofileTable.findOne({ id });
+      const existingUser = await userprofileTable.findOne({ id });
 
-    if (existingUser) {
-      // Delete existing record
-      await userprofileTable.deleteOne({ id });
-    }
+      if (existingUser) {
+        // Delete existing record
+        await userprofileTable.deleteOne({ id });
+      }
 
       const newUserProfileDetails = new userprofileTable(userData);
       const saveUserProfileDetails = await newUserProfileDetails.save();
