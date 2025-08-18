@@ -3,9 +3,24 @@ import React, { useEffect, useState } from "react";
 import { FaSpinner, FaStar } from "react-icons/fa";
 import { API_BASE_URL } from "../config";
 
+interface Job {
+  id: string;
+  jobroles: string;
+  company: string;
+  category: string;
+  location: string;
+  similarity_score: number;
+}
+
+interface PredictionResult {
+  user_id: string;
+  predicted_category: string;
+  top_jobs: Job[];
+}
+
 const ResultPage = () => {
   const [loading, setLoading] = useState(true);
-  const [resultOutput, setResultOutput] = useState<string | null>(null);
+  const [result, setResult] = useState<PredictionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const userId = localStorage.getItem("userSub");
@@ -18,12 +33,12 @@ const ResultPage = () => {
         return;
       }
 
-      const res = await axios.get(
-        `${API_BASE_URL}/api/read-predict-details/${userId}`
-      );
-
-      setResultOutput(res.data.output);
+      console.log("Fetching predictions...");
+      const res = await axios.get(`${API_BASE_URL}/api/read-predict-details/${userId}`);
+      console.log("Response from API:", res.data);
+      setResult(res.data);
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch prediction result.");
     } finally {
       setLoading(false);
@@ -50,23 +65,21 @@ const ResultPage = () => {
         </div>
       ) : error ? (
         <div className="text-red-500 text-lg">{error}</div>
-      ) : resultOutput ? (
+      ) : result ? (
         <div className="bg-white border rounded-lg shadow-md p-6 w-full max-w-3xl text-left">
-          {resultOutput.split("\n").map((line, index) => (
-            <p key={index} className="text-gray-800 mb-2">
-              {line.startsWith("Predicted Job Category") ? (
-                <span className="font-semibold text-blue-600">
-                  📌 {line}
-                </span>
-              ) : line.startsWith("-") ? (
-                <span className="text-gray-700 flex items-center">
-                  <FaStar className="text-yellow-500 mr-2" />
-                  {line.slice(1).trim()}
-                </span>
-              ) : (
-                line
-              )}
-            </p>
+          <p className="font-semibold text-blue-600 mb-4">
+            📌 Predicted Job Category: {result.predicted_category}
+          </p>
+          <h2 className="font-bold text-lg mb-2">Top {result.top_jobs.length} Job Matches:</h2>
+          {result.top_jobs.map((job, index) => (
+            <div key={job.id} className="mb-3 border-b pb-2">
+              <p className="text-gray-800 font-semibold">
+                {index + 1}. {job.jobroles} at {job.company}
+              </p>
+              <p className="text-gray-600">
+                Category: {job.category} | Location: {job.location} | Similarity: {job.similarity_score.toFixed(2)}
+              </p>
+            </div>
           ))}
         </div>
       ) : (

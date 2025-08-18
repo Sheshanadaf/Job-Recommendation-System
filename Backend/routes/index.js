@@ -4,9 +4,9 @@ const manageUserProfileDetails = require("../controller/manageUserProfileDetails
 const upload = require("../middleware/upload");
 
 const router = express.Router();
-
+console.log("dsdsfsf");
 // jobpost
-router.post("/add-jobpost", manageJobPost.createJobpost);
+router.post("/add-jobpost/:id", manageJobPost.createJobpost);
 router.get("/get-jobpost", manageJobPost.getjobpostdetails);
 
 // user profile Details

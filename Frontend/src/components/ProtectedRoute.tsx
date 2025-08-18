@@ -28,6 +28,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         if (res.data.authenticated) {
           setIsAuthenticated(true);
           localStorage.setItem("userSub", res.data.user.userId);
+          console.log("ffffffffffff",localStorage.getItem("userSub"));
           // Optionally save user info to localStorage or context
           // localStorage.setItem("userEmail", res.data.user.email);
         } else {

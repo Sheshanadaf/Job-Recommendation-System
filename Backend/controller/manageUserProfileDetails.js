@@ -4,8 +4,24 @@ const pdfParse = require("pdf-parse");
 const sw = require("stopword"); //
 const path = require("path");
 const { exec } = require("child_process");
-
 const router = require("../routes");
+
+const AWS = require("aws-sdk");
+
+// top of file (add)
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+
+const s3 = new S3Client({ region: process.env.AWS_REGION || "us-east-1" });
+
+// helper: escape double quotes for CSV fields
+function escapeCsvField(str) {
+  if (str === null || str === undefined) return "";
+  // convert to string, replace " with ""
+  return String(str).replace(/"/g, '""');
+}
+
+
+
 
 const manageUserProfileDetails = {
   // add cv
@@ -60,13 +76,23 @@ const manageUserProfileDetails = {
         summary: summary || null,
       };
 
+      // Check if ID already exists in DB
+    const existingUser = await userprofileTable.findOne({ id });
+
+    if (existingUser) {
+      // Delete existing record
+      await userprofileTable.deleteOne({ id });
+    }
+
       const newUserProfileDetails = new userprofileTable(userData);
       const saveUserProfileDetails = await newUserProfileDetails.save();
 
       res.status(201).json({
-        message: "CV/Qualification form Add Successfully",
-        data: saveUserProfileDetails,
-      });
+      message: existingUser
+        ? "Existing CV replaced with new data successfully"
+        : "CV/Qualification form added successfully",
+      data: saveUserProfileDetails,
+    });
 
     } catch (error) {
       console.log("error", error);
@@ -286,87 +312,67 @@ const manageUserProfileDetails = {
       console.log("Saved profile:", saved);
       //await profile.save();
 
-      // === Export to CSV ===
-      const outputPath = path.join(
-        __dirname,
-        "../exports/user_profiles_cleaned.csv"
-      );
-
-      const csvLine = `${profile._id},"${user_profiles_cleaned.join(" ")}"\n`;
-      if (!fs.existsSync(outputPath)) {
-        fs.writeFileSync(outputPath, "id,user_text_clean\n");
+      const bucket = process.env.S3_BUCKET;
+      if (!bucket) {
+        console.error("S3_BUCKET not set in environment");
+        // you can decide whether to fail or continue — here we'll return error
+        return res.status(500).json({ message: "S3_BUCKET not configured" });
       }
-      fs.appendFileSync(outputPath, csvLine, "utf8");
 
-      // === Run SBERT Python Script ===
-      // const { spawn } = require("child_process");
-      // const sbertScriptPath = path.join(
-      //   __dirname,
-      //   "../python/generate_embeddings.py"
-      // );
+      const prefix = process.env.S3_DATA_PREFIX || "dataset";
+      const key = `${prefix}/userdetails/user_${id}.csv`;
 
-      // // Use "python" not "python3" on Windows unless python3 is configured
-      // const sbertProcess = spawn("python", [sbertScriptPath]);
-      // console.log(
-      //   "Running generate_embeddings.py for user ID:",
-      //   profile._id.toString()
-      // );
+      // Build CSV content with header and a single row for this user.
+      // Escape double-quotes in the CSV field.
+      const csvHeader = "id,user_text_clean\n";
+      const textField = Array.isArray(user_profiles_cleaned)
+        ? user_profiles_cleaned.join(" ")
+        : (user_profiles_cleaned || "");
+      const safeText = escapeCsvField(textField); // replace " -> ""
+      const csvContent = `${csvHeader}${id},"${safeText}"\n`;
 
-      // let sbertOutput = "";
-      // let sbertError = "";
+      try {
+        await s3.send(new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: csvContent,
+          ContentType: "text/csv",
+          // optional: ServerSideEncryption: "AES256"
+        }));
+        console.log(`Uploaded user CSV to s3://${bucket}/userdetails/${key}`);
+      } catch (s3Err) {
+        console.error("Failed to upload user CSV to S3:", s3Err);
+        return res.status(500).json({ message: "Failed to upload CSV to S3", error: s3Err.toString() });
+      }
 
-      // sbertProcess.stdout.on(
-      //   "data",
-      //   (data) => (sbertOutput += data.toString())
-      // );
-      // sbertProcess.stderr.on("data", (data) => (sbertError += data.toString()));
-      
-      // sbertProcess.on("close", (code) => {
-      //   if (code !== 0) {
-      //     return res.status(500).json({
-      //       message: "SBERT embedding generation failed.",
-      //       error: sbertError,
-      //     });
-      //   }
-      //   // === Step 2: After SBERT, run xgboost_pipeline.py ===
-      //   const xgbScriptPath = path.join(
-      //     __dirname,
-      //     "../python/xgboost_pipeline.py"
-      //   );
+      async function appendToCSV(userId, newRow) {
+        const fileKey = `dataset/${userId}.csv`;
 
-      //   // ✅ FIXED: Now we pass user ID
-      //   const xgbProcess = spawn("python", [
-      //     xgbScriptPath,
-      //     profile._id.toString(),
-      //   ]);
-      //   console.log(
-      //     "Running xgboost_pipeline.py for user ID:",
-      //     profile._id.toString()
-      //   );
+        try {
+            let existingData = "";
+            try {
+                const existing = await s3.getObject({ Bucket: BUCKET_NAME, Key: fileKey }).promise();
+                existingData = existing.Body.toString();
+            } catch (err) {
+                if (err.code !== "NoSuchKey") throw err;
+            }
 
-      //   let xgbOutput = "";
-      //   let xgbError = "";
+            const newLine = Array.isArray(newRow) ? newRow.join(",") : newRow;
+            const updatedData = existingData
+                ? existingData + "\n" + newLine
+                : newLine;
 
-      //   xgbProcess.stdout.on("data", (data) => (xgbOutput += data.toString()));
-      //   xgbProcess.stderr.on("data", (data) => (xgbError += data.toString()));
+            await s3.putObject({
+                Bucket: BUCKET_NAME,
+                Key: fileKey,
+                Body: updatedData
+            }).promise();
 
-      //   xgbProcess.on("close", (xgbCode) => {
-      //     if (xgbCode !== 0) {
-      //       return res.status(500).json({
-      //         message: "XGBoost pipeline failed.",
-      //         error: xgbError,
-      //       });
-      //     }
-
-      //     return res.status(200).json({
-      //     message: "User profile processed successfully.",
-      //     userId: profile._id,
-      //     user_profiles_cleaned,
-      //     sbertOutput,
-      //     xgbOutput,
-      //   });
-      //   });
-      // });
+            console.log(`✅ Data appended for user: ${userId}`);
+        } catch (error) {
+            console.error("❌ Error appending CSV:", error);
+        }
+    }
     
     } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -378,59 +384,50 @@ const manageUserProfileDetails = {
   // New: Read CV Data
   getPredictDetails: async (req, res) => {
     try {
-      console.log("dddd");
-      const { id } = req.params;
-      const profile = await userprofileTable.findOne({ id });
-      console.log("sas1111458", profile);
+        console.log("SSS");
+        const AWS = require("aws-sdk");
 
-      if (!profile) {
-        return res.status(404).json({ message: "User profile not found." });
-      }
+        // Configure AWS SDK
+        AWS.config.update({ region: "us-east-1" });
+        const lambda = new AWS.Lambda();
 
-        // === Step 2: After SBERT, run xgboost_pipeline.py ===
-        const path = require("path");
-        const { spawn } = require("child_process");
-        const aScriptPath = path.join(
-          __dirname,
-          "../python/a.py"
-        );
+        console.log("Calling Lambda for predictions...");
 
-        
-        // ✅ FIXED: Now we pass user ID
-        const xgbProcess = spawn("python", [
-          aScriptPath,
-          profile._id.toString(),
-        ]);
-        console.log(
-          "Running a.py for user ID:",
-          profile._id.toString()
-        );
+        // Hardcoded for now; you can later replace with req.params.id
+        //const id = "689cbd79a47f654f05a5adcd";
+        const { id } = req.params;
 
-        let xgbOutput = "";
-        let xgbError = "";
+        // Lambda invoke parameters
+        const params = {
+            FunctionName: "jrs-predict", // replace with your Lambda name
+            InvocationType: "RequestResponse", // synchronous
+            Payload: JSON.stringify({ user_id: id })
+        };
 
-        xgbProcess.stdout.on("data", (data) => (xgbOutput += data.toString()));
-        xgbProcess.stderr.on("data", (data) => (xgbError += data.toString()));
+        // Call Lambda
+        const lambdaResponse = await lambda.invoke(params).promise();
+        console.log("Raw Lambda response:", lambdaResponse);
 
-        xgbProcess.on("close", (xgbCode) => {
-          if (xgbCode !== 0) {
-            return res.status(500).json({
-              message: "XGBoost pipeline failed.",
-              error: xgbError,
-            });
-          }
+        // Lambda returns a JSON string in Payload
+        const payload = JSON.parse(lambdaResponse.Payload);
+        console.log("Parsed Lambda payload:", payload);
 
-          return res.status(200).json({
-          message: "✅ Prediction completed successfully.",
-          output: xgbOutput.trim(),
-        });
-        });
-      // });
+        // If Lambda returns an error inside payload
+        if (payload.statusCode && payload.statusCode !== 200) {
+            console.log("Lambda error:", payload.body ? JSON.parse(payload.body) : payload);
+            return res.status(payload.statusCode).json(payload.body ? JSON.parse(payload.body) : payload);
+        }
+
+        // Success
+        console.log("Lambda success response:", payload.body ? JSON.parse(payload.body) : payload);
+        return res.status(200).json(payload.body ? JSON.parse(payload.body) : payload);
+
     } catch (error) {
-      console.error("Error fetching user profile:", error);
-      res.status(500).json({ message: "Error retrieving user profile" });
+        console.error("Error calling Lambda:", error);
+        return res.status(500).json({ error: error.message });
     }
-  },
+}
+
 };
 
 module.exports = manageUserProfileDetails;

@@ -18,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
   localStorage.removeItem("token");  // Remove JWT from browser storage
+  localStorage.removeItem("userSub");
   navigate("/");                     // Redirect to login page client-side
 };
 

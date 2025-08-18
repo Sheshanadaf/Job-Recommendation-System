@@ -9,7 +9,9 @@ import { ArrowLeft, Briefcase } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { API_BASE_URL } from "../config";
 
+
 const PostJobPage: React.FC = () => {
+  const id = localStorage.getItem("userSub");
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     jobRole: '',
@@ -49,7 +51,7 @@ const handleSubmit = async () => {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/add-jobpost`, {
+    const response = await fetch(`${API_BASE_URL}/api/add-jobpost/${id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
