@@ -37,7 +37,7 @@ const ResultPage = () => {
       setResult(res.data);
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch prediction result.");
+      setError("Please try again later. Your prediction is on the way");
     } finally {
       setLoading(false);
     }

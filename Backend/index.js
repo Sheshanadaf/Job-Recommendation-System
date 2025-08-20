@@ -11,8 +11,8 @@ const mongoose = require("mongoose");
 const app = express();
 
 const corsOptions = {
-  origin: "http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com",
-  //origin: "http://localhost:3000",
+  //origin: "http://job-recommendation-system-sheshan.s3-website-us-east-1.amazonaws.com",
+  origin: "http://localhost:3000",
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],

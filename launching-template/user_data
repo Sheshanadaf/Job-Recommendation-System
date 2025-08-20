@@ -1,0 +1,48 @@
+#!/bin/bash
+apt-get install gnupg curl
+
+curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
+   --dearmor
+
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+
+apt-get update -y
+apt-get install -y nodejs npm git
+sudo apt-get install -y mongodb-org
+
+mkdir -p /home/ubuntu/app
+cd /home/ubuntu/app
+
+# Clone your repo (adjust branch if needed)
+git clone https://github.com/Sheshanadaf/Job-Recommendation-System.git .
+
+cd Backend
+
+wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+npm install
+
+# Write env variables to .env file
+echo "MONGODB_URI=" >> .env
+echo "JWT_SECRET=" >> .env
+echo "PORT=3001" >> .env
+echo "AWS_ACCESS_KEY_ID=" >> .env
+echo "AWS_SECRET_ACCESS_KEY=" >> .env
+echo "AWS_REGION=" >> .env
+echo "S3_BUCKET=<bucket B>" >> .env
+echo "S3_DATA_PREFIX=dataset" >> .env
+
+mkdir exports
+mkdir uploads
+
+chown -R ubuntu:ubuntu /home/ubuntu/app/Backend/exports
+chown -R ubuntu:ubuntu /home/ubuntu/app/Backend/uploads
+chown -R ubuntu:ubuntu /home/ubuntu/app/Backend/models
+
+chmod -R 755 /home/ubuntu/app/Backend/exports
+chmod -R 755 /home/ubuntu/app/Backend/uploads
+chmod -R 755 /home/ubuntu/app/Backend/models
+
+
+# Start your node app (you might want to use pm2 or systemd in production)
+node index.js
