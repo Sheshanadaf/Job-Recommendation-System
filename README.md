@@ -35,7 +35,7 @@ This project demonstrates how to host my **Machine Learning-based Job Recommenda
 
 ## 🎥 Demo Video
 
-[Watch the demo](https://www.youtube.com/@CuteCloudiees)
+[Watch the demo](https://youtu.be/6er4gzglUt4?si=SgP-oG0nrCdmzYxC)
 
 ---
 
